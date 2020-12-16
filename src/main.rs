@@ -28,31 +28,31 @@ impl Fontset {
 }
 
 struct Chip8 {
-    ram:         [u8; 4096],    // 4k memory
-    vram:        [u8; 64 * 32], // Graphics memory
-    stack:       [u16; 16],     // Stack w/ 16 levels
-    sp:          usize,         // Stack pointer
-    v:           [u8; 16],      // General purpose registers V0-VE + flag register VF (8bit)
-    i:           u16,           // Index register (16bit)
-    pc:          usize,         // Program counter
-    delay_timer: u8,            // Delay Timer
-    sound_timer: u8,            // Sound timer
-    key:         u16,           // Hex Keypad bit array
+    ram: [u8; 4096],     // 4k memory
+    vram: [u8; 64 * 32], // Graphics memory
+    stack: [u16; 16],    // Stack w/ 16 levels
+    sp: usize,           // Stack pointer
+    v: [u8; 16],         // General purpose registers V0-VE + flag register VF (8bit)
+    i: u16,              // Index register (16bit)
+    pc: usize,           // Program counter
+    delay_timer: u8,     // Delay Timer
+    sound_timer: u8,     // Sound timer
+    key: u16,            // Hex Keypad bit array
 }
 
 impl Chip8 {
     pub fn new() -> Self {
         Self {
-            ram:         [0; 4096],
-            vram:        [0; 64 * 32],
-            stack:       [0; 16],
-            sp:          0,
-            v:           [0; 16],
-            i:           0x0,
-            pc:          0x200,
+            ram: [0; 4096],
+            vram: [0; 64 * 32],
+            stack: [0; 16],
+            sp: 0,
+            v: [0; 16],
+            i: 0x0,
+            pc: 0x200,
             delay_timer: 0,
             sound_timer: 0,
-            key:         0,
+            key: 0,
         }
     }
 
@@ -296,8 +296,15 @@ impl Chip8 {
                 0x001E => {},
                 // FX29 => Set i to location of sprite for value in VX
                 0x0029 => {},
-                // FX33 => Store 3-digit binary-coded decimal of VX in i..i+2
-                0x0033 => {},
+                // FX33 => Store 3-digit binary-coded decimal of VX in memory at address i..i+2
+                0x0033 => {
+                    let x = ((opcode & 0x0F00) >> 8) as usize;
+                    let j = self.i as usize;
+
+                    self.ram[j] = self.v[x] / 100;
+                    self.ram[j + 1] = (self.v[x] / 10) % 10;
+                    self.ram[j + 2] = (self.v[x] % 100) % 10;
+                },
                 // FX55 => Dump registers 0..X to ram, starting at address i
                 0x0055 => {},
                 // FX65 => Fill registers 0..X with data from ram, starting at address i
