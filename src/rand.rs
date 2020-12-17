@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Read;
 
-pub struct Rand();
+pub struct Rand;
 
 impl Rand {
     pub fn random_u8() -> Option<u8> {
